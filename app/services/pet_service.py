@@ -81,11 +81,16 @@ def update_pet_service(
     )
     return rows_updated
 
+import mariadb
+
 # --------------------------------------------------
 # 6. Delete a pet through the Service Layer
 # --------------------------------------------------
 def delete_pet_service(pet_id):
     if not isinstance(pet_id, int) or pet_id <= 0:
         raise ValueError("Invalid pet_id: must be a positive integer")
-    rows_deleted = delete_pet(pet_id)
-    return rows_deleted
+    try:
+        rows_deleted = delete_pet(pet_id)
+        return rows_deleted
+    except mariadb.IntegrityError as e:
+        raise ValueError(f"Cannot delete pet ID {pet_id}: pet has related bookings in the system") from e
